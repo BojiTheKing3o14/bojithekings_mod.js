@@ -181,17 +181,6 @@ elements.silicon_gas = {
     temp: 1500
 }
 
-elements.firebal = {
-    color: "#fff200",
-    behavior: [
-        "XX|XX|XX",
-        "XX|EX:30>plasma|XX",
-        "XX|XX|XX"
-    ],
-    state: "gas",
-    temp: 100000
-}
-
 elements.chromium = {
     color: ["#beebf0", "#87c0cc"],
     behavior: behaviors.SOLID,
@@ -259,41 +248,9 @@ elements.infinite_burn = {
     state: "solid",
     burn: 100,
     burnTime: 1e9, //more then one irl year
-    fireColor: "#eaff00"
+    fireColor: "#eaff00",
+    category: "special"
 }
-
-
-elements.h_bomb.behavior = [
-    "XX|XX|XX",
-	"XX|XX|XX",
-	"M2|M1 AND EX:90>plasma,plasma,plasma,plasma,fire,neutron,helium|M2",
-]
-
-elements.hydrogen.reactions["hydrogen"] = {
-    elem1: "h_explosion" , elem2: null, tempMin: 70000
-}
-
-elements.h_explosion = {
-    color: "#aeff00",
-    state: "gas",
-    behavior: [
-        "XX|XX|XX",
-        "XX|EX:90>plasma,plasma,plasma,plasma,fire,neutron,helium|XX",
-        "XX|XX|XX"
-    ],
-    alias: "thermonuclear explosion",
-    category: "fusion_explsosion"
-}
-
-elements.short_super_heater = {
-    color: "#c14a4a",
-    behavior: [
-        "XX|HT:5000|XX",
-        "HT:5000|DL%10|HT:5000",
-        "XX|HT:5000|XX"
-    ]
-}
-
 
 elements.cluster_bomb = {
     color: "#9b9b9b",
@@ -367,11 +324,331 @@ elements.brown_dwarf = {
     category: "special"
 }
 
-elements.sun.tempLow = 2225
-elements.sun.stateLow = "brown_dwarf"
-
-//to make it more realistic and hoping it doesn't ruin gameplay
 elements.plasma.behavior = behaviors.GAS
-elements.plasma.temp = 12500
+elements.plasma.temp = 45000,
+elements.plasma.tempLow = 40000
+elements.fire.tempHigh = 42500,
 
+
+elements.h_bomb.behavior = [
+    "XX|XX|XX",
+	"XX|XX|XX",
+	"M2|M1 AND EX:90>plasma,plasma,plasma,plasma,fire,neutron,helium|M2",
+]
+
+elements.hydrogen.reactions["hydrogen"] = {
+    elem1: ["h2", "positron"] , elem2: null, tempMin: 70000
+}
+
+elements.h_explosion = {
+    color: "#aeff00",
+    state: "gas",
+    behavior: [
+        "XX|XX|XX",
+        "XX|EX:90>plasma,plasma,plasma,plasma,fire,neutron,helium|XX",
+        "XX|XX|XX"
+    ],
+    alias: "thermonuclear explosion",
+    category: "energy"
+}
+
+elements.short_super_heater = {
+    color: "#c14a4a",
+    behavior: [
+        "XX|HT:5000|XX",
+        "HT:5000|DL%10|HT:5000",
+        "XX|HT:5000|XX"
+    ],
+    category: "machines"
+}
+elements.heavy_steam = {
+	color: "#536c83",
+	behavior: behaviors.GAS,
+	tick: function(pixel) {
+		if (pixel.temp > 3000 && Math.random() < 0.01) {
+			changePixel(pixel,Math.random() < 0.5 ? "h2" : "oxygen");
+		}
+	},
+	reactions: {
+		"smoke": { elem1: "smog", elem2: null, chance:0.001 },
+		"carbon_dioxide": { elem1: "smog", elem2: null, chance:0.001 },
+		"plasma": { elem1:"ozone", tempMin:500, charged:true },
+		"copper": { elem1:"oxygen", elem2:"oxidized_copper", chance:0.01 },
+		"bronze": { elem1:"oxygen", elem2:"oxidized_copper", chance:0.005 },
+		"iron": { elem1:"oxygen", elem2:"rust", chance:0.005 },
+		"steel": { elem1:"oxygen", elem2:"rust", chance:0.004 },
+		"tornado":{elem1:"cloud"},
+		"melted_wax": { elem1:"explosion" }
+	},
+	temp: 150,
+	tempLow: 95,
+	stateLow: "heavy_water",
+	category: "gases",
+	state: "gas",
+	density: 0.6,
+	conduct: 0.002,
+	stain: -0.05,
+	alias: "heavy water vapor",
+	extinguish: true
+}
+
+elements.seawater = {
+    color: "#22d5de",
+    behavior: behaviors.LIQUID,
+    state: "liquid",
+    tempHigh: 101,
+    stateHigh: ["steam", "steam", "steam", "salt", "heavy_steam"],
+    tempLow: -2,
+    stateLow: "frozen_seawater",
+    density: 1025,
+    category: "liquids"
+}
+
+elements.frozen_seawater = {
+    color: "#7fced2",
+    behavior: behaviors.WALL,
+    state: "solid",
+    tempHigh: "-1",
+    stateHigh: "seawater",
+    density: 910,
+    temp: -5,
+    category: "liquids"
+}
+
+elements.heavy_water = {
+    color: "#1643a3",
+	behavior: behaviors.LIQUID,
+	tempHigh: 101.4,
+	stateHigh: "heavy_steam",
+	tempLow: 0,
+	category: "liquids",
+	heatCapacity: 4.184,
+	reactions: {
+		"dust": { elem1: "heavy_dirty_water", elem2: null },
+		"ash": { elem1: "heavy_dirty_water", elem2: null },
+		"cyanide": { elem1: "heavy_dirty_water", elem2: null },
+		"cyanide_gas": { elem1: "heavy_dirty_water", elem2: null },
+		"carbon_dioxide": { elem1: "seltzer", elem2: null, oneway:true },
+		"sulfur": { elem1: "heavy_dirty_water", elem2: null },
+		"rat": { elem1: "heavy_dirty_water", chance:0.005 },
+		"infection": { elem1: "heavy_dirty_water", elem2: null },
+		"plague": { elem1: "heavy_dirty_water", elem2: null },
+		"rust": { elem1: "heavy_dirty_water", chance:0.005 },
+		"lead": { elem1: "heavy_dirty_water", chance:0.005 },
+		"solder": { elem1: "heavy_dirty_water", chance:0.005 },
+		"fallout": { elem1: "heavy_dirty_water", chance:0.25 },
+		"radiation": { elem1: "heavy_dirty_water", chance:0.25 },
+		"uranium": { elem1: "heavy_dirty_water", chance:0.25 },
+		"rad_steam": { elem1: "heavy_dirty_water", chance:0.02 },
+		"rad_glass": { elem1: "heavy_dirty_water", chance:0.005 },
+		"rad_shard": { elem1: "heavy_dirty_water", chance:0.01 },
+		"rotten_meat": { elem1: "heavy_dirty_water", chance:0.25 },
+		"rotten_cheese": { elem1: "heavy_dirty_water", chance:0.25 },
+		"cancer": { elem1: "heavy_dirty_water", chance:0.25 },
+		"oil": { elem1: "heavy_dirty_water", chance:0.005 },
+		"dioxin": { elem1: "heavy_dirty_water", chance:0.1 },
+		"neutron": { elem1: ["heavy_dirty_water","heavy_dirty_water","heavy_dirty_water","rad_steam"], elem2:null, chance:0.1 },
+		"rock": { elem2: "wet_sand", chance: 0.00035 },
+		"limestone": { elem2: "wet_sand", chance: 0.00035 },
+		"tuff": { elem2: "wet_sand", color2:"#7a6b5c", chance: 0.00035 },
+		"ruins": { elem2: "rock", chance: 0.00035 },
+		"mudstone": { elem2: "mud", chance: 0.00035 },
+		"methane": { elem1:"primordial_soup", elem2:"primordial_soup", tempMin:60, charged:true },
+		"ammonia": { elem1:"primordial_soup", elem2:"primordial_soup", tempMin:60, charged:true },
+		"fly": { elem2:"dead_bug", chance:0.1, oneway:true },
+		"firefly": { elem2:"dead_bug", chance:0.1, oneway:true },
+		"bee": { elem2:"dead_bug", chance:0.05, oneway:true },
+		"stink_bug": { elem2:"dead_bug", chance:0.1, oneway:true },
+		"cured_meat": { elem1:"salt_water", elem2:"meat" },
+		"heavy_water": { elem2:"bubble", attr2:{"clone":"heavy_water"}, chance:0.001, tempMin:85 },
+        "salt_water": {elem1: "seawater", elem2: null, chance: 0.05},
+		// electrolysis:
+		"aluminum": { elem1:["h2","h2","oxygen"], charged:true, chance:0.0025 },
+		"zinc": { elem1:["h2","h2","oxygen"], charged:true, chance:0.015 },
+		"steel": { elem1:["h2","h2","oxygen"], charged:true, chance:0.0125 },
+		"iron": { elem1:["h2","h2","oxygen"], charged:true, chance:0.0125 },
+		"tin": { elem1:["h2","h2","oxygen"], charged:true, chance:0.01 },
+		"brass": { elem1:["h2","h2","oxygen"], charged:true, chance:0.001 },
+		"bronze": { elem1:["h2","h2","oxygen"], charged:true, chance:0.001 },
+		"copper": { elem1:["h2","h2","oxygen"], charged:true, chance:0.0075 },
+		"silver": { elem1:["h2","h2","oxygen"], charged:true, chance:0.0075 },
+		"gold": { elem1:["h2","h2","oxygen"], charged:true, chance:0.0075 }
+	},
+	state: "liquid",
+	density: 1105,
+	conduct: 0.02,
+	stain: -0.5,
+	extinguish: true
+}
+
+elements.heavy_dirty_water = {
+	color: ["#0b643c","#054636","#094d26"],
+	behavior: behaviors.LIQUID,
+	tempHigh: 105,
+	stateHigh: ["heavy_steam","carbon_dioxide"],
+	tempLow: -5,
+	stateLowName: "dirty_heavy_ice",
+	viscosity: 10,
+	category: "liquids",
+	reactions: {
+		"rock": { elem2: "wet_sand", chance: 0.0004 },
+		"limestone": { elem2: "wet_sand", chance: 0.0004 },
+		"plant": { elem1:"heavy_water", chance:0.05 },
+		"algae": { elem1:"heavy_water", chance:0.05 },
+		"kelp": { elem1:"heavy_water", chance:0.05 },
+		"coral": { elem1:"heavy_water", chance:0.05 },
+		"charcoal": { elem1:"heavy_water", chance:0.02 },
+		"gravel": { elem1:"heavy_water", chance:0.01 },
+		"fly": { elem2:"dead_bug", chance:0.1, oneway:true },
+		"firefly": { elem2:"dead_bug", chance:0.1, oneway:true },
+		"bee": { elem2:"dead_bug", chance:0.05, oneway:true },
+		"stink_bug": { elem2:"dead_bug", chance:0.1, oneway:true },
+		"dirty_water": { elem2:"bubble", attr2:{"clone":"heavy_water"}, chance:0.001, tempMin:85 },
+		"coral": { elem1:null, elem2:"dirty_water", chance:0.004 }
+	},
+	hidden: true,
+	state: "liquid",
+	density: 1005,
+	conduct: 0.1,
+	extinguish: true
+}
 // ISOTOPES category is gonna come next in 1.1v
+//Calculated that the games "helium" is helium-4
+
+
+elements.h2 = {
+    color: "#243852",
+    behavior: behaviors.GAS,
+    state: "gas",
+    density: 0.180,
+    category: "isotopes",
+    tempLow: -254,
+    stateLow: "h2_liquid",
+    reactions: {
+        "h3": {elem1: ["helium", "neutron"], elem2: null, tempMin: 10000},
+        "h2": {elem1: ["he3", "neutron"], elem2: null, tempMin: 40000}
+    },
+    alias: "deuterium"
+}
+
+elements.h2_liquid = {
+    color: "#4e627d",
+    behavior: behaviors.LIQUID,
+    state: "liquid",
+    density: 70.8,
+    hidden: true,
+    tempHigh: -253,
+    stateHigh: "h2"
+}
+
+elements.h3 = {
+    color: "#1a212a",
+    behavior: [
+        "CR:radiation%0.1 AND M2|CR:radiation%0.1 AND M1|CR:radiation%0.1 AND M2",
+        "CR:radiation%0.1 AND M1|XX|CR:radiation%0.1 AND M1",
+        "CR:radiation%0.1 AND M2|CR:radiation%1 AND M1|CR:radiation%0.1 AND M2"
+    ],
+    state: "gas",
+    density: 0.269,
+    category: "isotopes",
+    tempLow: -254.5,
+    stateLow: "h3_liquid",
+    reactions: {
+        "h3": {elem1: ["helium", "neutron", "neutron"], elem2: null, tempMin: 40000}
+    },
+    alias: "tritium"
+}
+
+elements.h3_liquid = {
+    color: "#3d4652",
+    behavior: [
+        "CR:radiation%0.1|CR:radiation%0.1|CR:radiation%0.1",
+        "CR:radiation%0.1 AND M2%20|XX|CR:radiation%0.1 AND M2%20",
+        "CR:radiation%0.1 AND  M2|CR:radiation%0.1 AND M1|CR:radiation%0.1 AND M2"
+    ],
+    state: "liquid",
+    density: 125,
+    hidden: true,
+    tempHigh: -252.8,
+    stateHigh: "h3",
+}
+
+elements.he3 = {
+    color: "#5e5858",
+    behavior: behaviors.GAS,
+    state: "gas",
+    density: 0.135,
+    category: "isotopes",
+    tempLow: -272.85,
+    stateLow: "he3_liquid",
+    reactions: {
+        "hydrogen": {elem1: ["helium", "hydrogen"], elem2: null, tempMin: 10000}
+    }
+}
+
+elements.he3_liquid = {
+    color: "#656565",
+    behavior: behaviors.LIQUID,
+    state: "liquid",
+    density: 81,
+    hidden: true,
+    tempHigh: -272.84,
+    stateHigh: "he3"
+}
+
+elements.lithium = {
+    color: "#acacac",
+    behavior: behaviors.WALL,
+    state: "solid",
+    hardness: 0.06,
+    density: 538,
+    conduct: 0.48,
+    category: "solids",
+	darkText: true,
+    renderer: renderPresets.HEATGLOW,
+    alias: "li7",
+	tempHigh: 180
+}
+
+elements.li6 = {
+    color: "#929191",
+    behavior: behaviors.WALL,
+    state: "solid",
+    hardness: 0.056,
+    density: 534,
+    conduct: 0.48,
+    category: "isotopes",
+    darkText: true,
+    renderer: renderPresets.HEATGLOW,
+    tempHigh: 180
+}
+
+elements.molten_li6 = {
+    color: ["#ff4000", "#ff7300", "#ffd500"],
+    behavior: behaviors.MOLTEN,
+    state: "liquid",
+    viscosity: 4.18,
+    density: 512,
+    conduct: 0.48,
+    tempLow: 179,
+    stateLow: "li6",
+    hidden: true,
+    reactions: {
+        "neutron": {elem1: ["helium", "h3"], elem2: null, tempMin: 500}
+}
+}
+
+elements.be9 = {
+    color: "#a3c1ad",
+    behavior: behaviors.WALL,
+    state: "solid",
+    hardness: 5.5 / 10,   
+    density: 1850,      
+    conduct: 0.29,  
+    category: "isotopes",
+    renderer: renderPresets.HEATGLOW,
+    tempHigh: 1278,
+    reactions: {
+        "neutron": {elem2: null, /* absorbing neutron */ chance: 0.15}
+    }
+}
